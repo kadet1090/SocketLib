@@ -16,62 +16,74 @@ use Kadet\SocketLib\Utils\Logger;
 class SocketClient
 {
     /**
+     * Server which client is connected to.
      * @var string
      */
     protected $_address;
 
     /**
+     * Transport which client is connected by.
      * @var string
      */
     protected $_transport;
 
     /**
+     * Port on which client is connected to server.
      * @var int
      */
     protected $_port;
 
     /**
+     * Connection timeout.
      * @var int
      */
     protected $_timeout;
 
     # events
     /**
+     * Event triggered when connection is successfully established.
      * @var \Kadet\SocketLib\Utils\Event
      */
     public $onConnect;
 
     /**
+     * Event triggered when client is disconnected from server.
      * @var \Kadet\SocketLib\Utils\Event
      */
     public $onDisconnect;
 
     /**
+     * Event triggered when some
      * @var \Kadet\SocketLib\Utils\Event
      */
     public $onError;
 
     /**
+     * Event triggered when data is written to server.
      * @var \Kadet\SocketLib\Utils\Event
      */
-    public $onWrite;
+    public $onSend;
 
     /**
+     * Event triggered when data is received to server.
      * @var \Kadet\SocketLib\Utils\Event
      */
-    public $onRead;
+    public $onReceive;
 
     /**
+     * Determines if client is connected to server.
      * @var bool
      */
     public $isConnected;
 
     /**
+     * Clients sockets resource.
      * @var Resource
      */
     protected $_socket;
 
     /**
+     * Last error data.
      * @var array
      */
     protected $_error = array(
@@ -80,15 +92,16 @@ class SocketClient
     );
 
     /**
+     * Logger of clients events.
      * @var Logger
      */
     protected $_logger;
 
     /**
-     * @param $address
-     * @param $port
-     * @param $transport
-     * @param int $timeout
+     * @param string $address   Servers address.
+     * @param int    $port      Servers port.
+     * @param string $transport Servers transport.
+     * @param int    $timeout   Connection timeout.
      */
     public function __construct($address, $port, $transport = 'tcp', $timeout = 30)
     {
@@ -100,12 +113,13 @@ class SocketClient
         $this->onConnect    = new Event;
         $this->onDisconnect = new Event;
         $this->onError      = new Event;
-        $this->onWrite      = new Event;
-        $this->onRead       = new Event;
+        $this->onSend       = new Event;
+        $this->onReceive    = new Event;
     }
 
     /**
-     * @param bool $blocking
+     * Connects to specified server.
+     * @param bool $blocking Blocking or not blocking mode.
      */
     public function connect($blocking = true)
     {
@@ -125,30 +139,45 @@ class SocketClient
         $this->onConnect->run();
     }
 
+    public function disconnect()
+    {
+        $this->isConnected = false;
+        $this->onDisconnect->run();
+        stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
+    }
+
     /**
-     * @param $text string
+     * Sends packet to the server.
+     * @param string $text Packets content.
      */
-    public function write($text)
+    public function send($text)
     {
         if (!fwrite($this->_socket, $text))
             $this->raiseError();
         else
-            $this->onWrite->run($text);
+            $this->onSend->run($text);
     }
 
     /**
+     * Receives data from server.
      * @return string
      */
-    public function read()
+    public function receive()
     {
+        if(!$this->isConnected) return false;
+
         $result = '';
         do {
-            $content = stream_get_contents($this->_socket);
+            if(($content = stream_get_contents($this->_socket)) === false) {
+                $this->disconnect();
+                $this->raiseError();
+                return false;
+            }
             $result .= $content;
         } while (!empty($content) && !empty($result));
 
         if(!empty($result))
-            $this->onRead->run($result);
+            $this->onReceive->run($result);
 
         return trim($result);
     }
@@ -163,6 +192,6 @@ class SocketClient
     }
 
     public function __destruct() {
-        stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
+        $this->disconnect();
     }
 }

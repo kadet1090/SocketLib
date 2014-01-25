@@ -91,7 +91,7 @@ class SocketServerClient {
         } while($left > 0);
 
         $this->onWrite->run($text);
-        $this->_server->onReceive->run($this, $text);
+        $this->_server->onSend->run($this, $text);
 
         if(isset($this->_logger)) $this->_logger->debug("Sent ".strlen($text)." bytes to {$this}: {$text}");
     }
@@ -139,5 +139,10 @@ class SocketServerClient {
      */
     public function __toString() {
         return (string)$this->_address;
+    }
+
+    public function close() {
+        socket_shutdown($this->socket);
+        socket_close($this->socket);
     }
 } 
