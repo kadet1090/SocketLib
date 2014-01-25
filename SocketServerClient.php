@@ -15,7 +15,8 @@ use Kadet\SocketLib\Utils\Property;
  * @internal
  * @todo documentation
  */
-class SocketServerClient {
+class SocketServerClient
+{
     /**
      * Clients IP Address
      * @var string
@@ -57,24 +58,25 @@ class SocketServerClient {
      * Logger instance, to log important, not so important messages like debug.
      * @var Logger
      */
-    protected $_logger;
+    public $logger;
 
 
     /**
-     * @param resource     $socket Client's socket.
+     * @param resource $socket Client's socket.
      * @param SocketServer $server Client's server.
      */
     public function __construct($socket, SocketServer $server)
     {
-        $this->socket  = $socket;
-        $this->_server  = $server;
+        $this->socket = $socket;
+        $this->_server = $server;
+        $this->logger = $this->_server->logger;
         socket_getpeername($this->socket, $this->_address);
 
-        $this->onConnect    = new Event;
+        $this->onConnect = new Event;
         $this->onDisconnect = new Event;
-        $this->onError      = new Event;
-        $this->onWrite      = new Event;
-        $this->onRead       = new Event;
+        $this->onError = new Event;
+        $this->onWrite = new Event;
+        $this->onRead = new Event;
     }
 
     /**
@@ -86,14 +88,14 @@ class SocketServerClient {
         $left = strlen($text);
         do {
             $written = socket_write($this->socket, $text);
-            if($written === false) $this->_raiseError();
+            if ($written === false) $this->_raiseError();
             $left -= $written;
-        } while($left > 0);
+        } while ($left > 0);
 
-        $this->onWrite->run($text);
-        $this->_server->onSend->run($this, $text);
+        $this->onWrite->run($this, $text);
+        $this->_server->onSend->run($this->_server, $this, $text);
 
-        if(isset($this->_logger)) $this->_logger->debug("Sent ".strlen($text)." bytes to {$this}: {$text}");
+        if (isset($this->logger)) $this->logger->debug("Sent " . strlen($text) . " bytes to {$this}: {$text}");
     }
 
     /**
@@ -104,16 +106,16 @@ class SocketServerClient {
     {
         $result = '';
         do {
-            $content = socket_read($this->socket, 1024);
+            $content = @socket_read($this->socket, 1024);
             $result .= $content;
-            if($result === '') return false;
-            elseif($content === false) $this->_raiseError();
+            if ($content === '' && $result === '') return false;
+            if ($content === false) $this->_raiseError();
         } while (!empty($content) && !empty($result) && strlen($content) == 1024);
 
-        if(!empty($result)) {
-            $this->onRead->run($result);
-            $this->_server->onReceive->run($this, $result);
-            if(isset($this->_logger)) $this->_logger->debug("Received ".strlen($result)." bytes from {$this}: {$result}");
+        if (!empty($result)) {
+            $this->onRead->run($this, $result);
+            $this->_server->onReceive->run($this->_server, $this, $result);
+            if (isset($this->logger)) $this->logger->debug("Received " . strlen($result) . " bytes from {$this}: {$result}");
         }
 
         return trim($result);
@@ -125,24 +127,32 @@ class SocketServerClient {
      */
     private function _raiseError()
     {
-        $error['code']   = socket_last_error($this->socket);
-        $error['string'] = socket_strerror($error['code']);
+        $error['code'] = socket_last_error($this->socket);
+        $error['string'] = trim(socket_strerror($error['code']));
         socket_clear_error($this->socket);
+        if ($error['code'] == SOCKET_EINPROGRESS || $error['code'] == SOCKET_EWOULDBLOCK) return;
 
-        $this->onError->run((int)$error['code'], $error['string']);
-        $this->_server->onError->run((int)$error['code'], $error['string'], $this);
+        $this->onError->run($this, (int)$error['code'], $error['string']);
+        $this->_server->onError->run($this->_server, (int)$error['code'], $error['string'], $this);
         throw new NetworkException($error['string'], $error['code']);
     }
 
     /**
      * @return string
      */
-    public function __toString() {
+    public function __toString()
+    {
         return (string)$this->_address;
     }
 
-    public function close() {
+    public function close()
+    {
         socket_shutdown($this->socket);
         socket_close($this->socket);
+    }
+
+    public function _set_logger(Logger $logger)
+    {
+        $this->logger = $logger;
     }
 } 

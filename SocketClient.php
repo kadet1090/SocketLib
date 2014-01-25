@@ -5,8 +5,10 @@
  */
 
 namespace Kadet\SocketLib;
+
 use Kadet\SocketLib\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
+use Kadet\SocketLib\Utils\Property;
 
 /**
  * Class SocketClient
@@ -15,6 +17,8 @@ use Kadet\SocketLib\Utils\Logger;
  */
 class SocketClient
 {
+    use Property;
+
     /**
      * Server which client is connected to.
      * @var string
@@ -88,33 +92,33 @@ class SocketClient
      */
     protected $_error = array(
         'string' => '',
-        'code'   => 0
+        'code' => 0
     );
 
     /**
      * Logger of clients events.
      * @var Logger
      */
-    protected $_logger;
+    public $logger;
 
     /**
-     * @param string $address   Servers address.
-     * @param int    $port      Servers port.
+     * @param string $address Servers address.
+     * @param int $port Servers port.
      * @param string $transport Servers transport.
-     * @param int    $timeout   Connection timeout.
+     * @param int $timeout Connection timeout.
      */
     public function __construct($address, $port, $transport = 'tcp', $timeout = 30)
     {
-        $this->_address   = $address;
-        $this->_port      = $port;
-        $this->_timeout   = $timeout;
+        $this->_address = $address;
+        $this->_port = $port;
+        $this->_timeout = $timeout;
         $this->_transport = $transport;
 
-        $this->onConnect    = new Event;
+        $this->onConnect = new Event;
         $this->onDisconnect = new Event;
-        $this->onError      = new Event;
-        $this->onSend       = new Event;
-        $this->onReceive    = new Event;
+        $this->onError = new Event;
+        $this->onSend = new Event;
+        $this->onReceive = new Event;
     }
 
     /**
@@ -136,14 +140,17 @@ class SocketClient
         stream_set_blocking($this->_socket, $blocking);
 
         $this->isConnected = true;
-        $this->onConnect->run();
+        $this->onConnect->run($this);
     }
 
     public function disconnect()
     {
+        $this->receive(); // perform last read, to be sure that everything is received.
+
         $this->isConnected = false;
-        $this->onDisconnect->run();
-        stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
+        $this->onDisconnect->run($this);
+        //stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
+        //socket_close($this->_socket);
     }
 
     /**
@@ -155,7 +162,7 @@ class SocketClient
         if (!fwrite($this->_socket, $text))
             $this->raiseError();
         else
-            $this->onSend->run($text);
+            $this->onSend->run($this, $text);
     }
 
     /**
@@ -164,11 +171,11 @@ class SocketClient
      */
     public function receive()
     {
-        if(!$this->isConnected) return false;
+        if (!$this->isConnected) return false;
 
         $result = '';
         do {
-            if(($content = stream_get_contents($this->_socket)) === false) {
+            if (($content = stream_get_contents($this->_socket)) === false) {
                 $this->disconnect();
                 $this->raiseError();
                 return false;
@@ -176,8 +183,8 @@ class SocketClient
             $result .= $content;
         } while (!empty($content) && !empty($result));
 
-        if(!empty($result))
-            $this->onReceive->run($result);
+        if (!empty($result))
+            $this->onReceive->run($this, $result);
 
         return trim($result);
     }
@@ -187,11 +194,13 @@ class SocketClient
      */
     private function raiseError()
     {
-        $this->onError->run((int)$this->_error['code'], $this->_error['string']);
+        $this->onError->run($this, (int)$this->_error['code'], $this->_error['string']);
         throw new NetworkException($this->_error['string'], $this->_error['code']);
     }
 
-    public function __destruct() {
-        $this->disconnect();
+    public function __destruct()
+    {
+        echo 'test';
+        if ($this->isConnected) $this->disconnect();
     }
 }

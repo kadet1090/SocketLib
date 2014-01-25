@@ -6,9 +6,8 @@
 namespace Kadet\SocketLib\Utils;
 
 use Psr\Log\AbstractLogger;
-use Psr\Log\LogLevel;
 
-class Logger extends  AbstractLogger
+class Logger extends AbstractLogger
 {
     /**
      * Directory where logs are stored.
@@ -24,10 +23,17 @@ class Logger extends  AbstractLogger
 
     public function __construct($file, $debugLevel = null)
     {
-        $this->_file['default'] = $file;
+        if (is_string($file))
+            $this->_file['default'] = $file;
+        elseif (is_array($file) && isset($file['default']))
+            $this->_file = $file;
+        else
+            throw new \InvalidArgumentException('$file needs to be string or array with at least \'default\' log defined.');
         $this->debugLevel = defined('DEBUG_LEVEL') && $debugLevel === null ? DEBUG_LEVEL : (int)$debugLevel;
-        if(!file_exists(self::$directory)) mkdir(self::$directory, 0777, true);
-        if(!file_exists(self::$directory.'/'.$this->_file)) touch(self::$directory.'/'.$this->_file);
+
+        if (!file_exists(self::$directory)) mkdir(self::$directory, 0777, true);
+        foreach ($this->_file as $current)
+            if (!file_exists(self::$directory . '/' . $current)) touch(self::$directory . '/' . $current);
     }
 
     /**
@@ -111,7 +117,7 @@ class Logger extends  AbstractLogger
      */
     public function debug($message, array $context = array())
     {
-        if($this->debugLevel >= 1)
+        if ($this->debugLevel >= 1)
             echo "\033[1;30m[" . date('H:i:s') . " ?] \033[0m" . $message . PHP_EOL;
         parent::debug($message, $context);
     }
