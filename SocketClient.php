@@ -13,7 +13,6 @@ use Kadet\SocketLib\Utils\Property;
 /**
  * Class SocketClient
  * @package Kadet\SocketLib
- * @todo documentation
  */
 class SocketClient
 {
@@ -92,7 +91,7 @@ class SocketClient
      */
     protected $_error = array(
         'string' => '',
-        'code' => 0
+        'code'   => 0
     );
 
     /**
@@ -102,27 +101,28 @@ class SocketClient
     public $logger;
 
     /**
-     * @param string $address Servers address.
-     * @param int $port Servers port.
+     * @param string $address   Servers address.
+     * @param int    $port      Servers port.
      * @param string $transport Servers transport.
-     * @param int $timeout Connection timeout.
+     * @param int    $timeout   Connection timeout.
      */
     public function __construct($address, $port, $transport = 'tcp', $timeout = 30)
     {
-        $this->_address = $address;
-        $this->_port = $port;
-        $this->_timeout = $timeout;
+        $this->_address   = $address;
+        $this->_port      = $port;
+        $this->_timeout   = $timeout;
         $this->_transport = $transport;
 
-        $this->onConnect = new Event;
+        $this->onConnect    = new Event;
         $this->onDisconnect = new Event;
-        $this->onError = new Event;
-        $this->onSend = new Event;
-        $this->onReceive = new Event;
+        $this->onError      = new Event;
+        $this->onSend       = new Event;
+        $this->onReceive    = new Event;
     }
 
     /**
      * Connects to specified server.
+     *
      * @param bool $blocking Blocking or not blocking mode.
      */
     public function connect($blocking = true)
@@ -155,6 +155,7 @@ class SocketClient
 
     /**
      * Sends packet to the server.
+     *
      * @param string $text Packets content.
      */
     public function send($text)
@@ -178,6 +179,7 @@ class SocketClient
             if (($content = stream_get_contents($this->_socket)) === false) {
                 $this->disconnect();
                 $this->raiseError();
+
                 return false;
             }
             $result .= $content;

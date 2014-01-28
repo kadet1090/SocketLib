@@ -1,6 +1,4 @@
 <?php
-define('DEBUG_MODE', 2);
-
 include 'AutoLoader.php';
 include 'functions.php';
 
@@ -15,6 +13,13 @@ switch ($argv[1]) {
         break;
     case 'echo':
         $server = new \Kadet\SocketLib\Examples\EchoServer('localhost', 6969);
+        break;
+    case 'websocket':
+        $server = new \Kadet\SocketLib\Examples\WebSocket\WebSocketServer('localhost', 80);
+        $server->onMessage->add(function ($server, $client, $frame) {
+            $server->logger->info('New message: ' . $frame->content);
+            $client->send($frame->content);
+        });
         break;
     default:
         die('Wrong server type given');

@@ -123,28 +123,30 @@ class SocketServer
      */
     public $onError;
 
+    public $clientClass = 'Kadet\\SocketLib\\SocketServerClient';
+
     /**
-     * @param int $domain Protocol family to be used by the socket.
-     * @param int $type Type of communication to be used by the socket.
-     * @param int $protocol Sockets protocol.
-     * @param string $address Address on which server will be listening.
-     * @param int $port Port on which server will be listening.
+     * @param int    $domain   Protocol family to be used by the socket.
+     * @param int    $type     Type of communication to be used by the socket.
+     * @param int    $protocol Sockets protocol.
+     * @param string $address  Address on which server will be listening.
+     * @param int    $port     Port on which server will be listening.
      */
     public function __construct($domain, $type, $protocol, $address, $port = 0)
     {
-        $this->_domain = $domain;
-        $this->_type = $type;
+        $this->_domain   = $domain;
+        $this->_type     = $type;
         $this->_protocol = $protocol;
-        $this->_address = $address;
-        $this->_port = $port;
+        $this->_address  = $address;
+        $this->_port     = $port;
 
-        $this->onClientConnects = new Event;
+        $this->onClientConnects    = new Event;
         $this->onClientDisconnects = new Event;
-        $this->onStart = new Event;
-        $this->onStop = new Event;
-        $this->onReceive = new Event;
-        $this->onSend = new Event;
-        $this->onError = new Event;
+        $this->onStart             = new Event;
+        $this->onStop              = new Event;
+        $this->onReceive           = new Event;
+        $this->onSend              = new Event;
+        $this->onError             = new Event;
 
         $this->onStart->add(function ($server) {
             if (isset($this->logger)) $this->logger->info("Server has been started.");
@@ -162,6 +164,7 @@ class SocketServer
 
     /**
      * Starts server.
+     *
      * @param int $backlog Max limit of queued clients.
      */
     public function start($backlog = 0)
@@ -232,7 +235,7 @@ class SocketServer
     private function _nonblockHandle()
     {
         while ($client = @socket_accept($this->_socket)) {
-            $this->clients[] = new SocketServerClient($client, $this);
+            $this->clients[] = new $this->clientClass($client, $this);
             $this->onClientConnects->run($this, end($this->clients));
         }
 

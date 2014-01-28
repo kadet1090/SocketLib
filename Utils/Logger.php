@@ -43,7 +43,7 @@ class Logger extends AbstractLogger
     {
         file_put_contents(
             self::$directory . (isset($this->_file[$level]) ? $this->_file[$level] : $this->_file['default']),
-            '[' . date('H:i:s') . '] ' . $message . PHP_EOL,
+            '[' . date('H:i:s') . '] ' . $this->interpolate($message, $context) . PHP_EOL,
             FILE_APPEND
         );
     }
@@ -120,5 +120,14 @@ class Logger extends AbstractLogger
         if ($this->debugLevel >= 1)
             echo "\033[1;30m[" . date('H:i:s') . " ?] \033[0m" . $message . PHP_EOL;
         parent::debug($message, $context);
+    }
+
+    private function interpolate($message, $context)
+    {
+        $replace = [];
+        foreach ($context as $key => $value)
+            $replace["{{$key}}"] = $value;
+
+        return str_replace(array_keys($replace), array_values($replace), $message);
     }
 }
