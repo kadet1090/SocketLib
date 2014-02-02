@@ -1,0 +1,24 @@
+{
+    "name": "kadet/socket-lib",
+    "type": "library",
+    "description": "Event based socket library for php, supports (a)synchronous clients and servers.",
+    "keywords": ["socket","server","client","event"],
+    "homepage": "https://github.com/kadet1090/SocketLib",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Kacper \"Kadet\" Donat",
+            "email": "kadet1090@gmail.com",
+            "homepage": "http://kadet.pipe-software.xaa.pl",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Kadet\\SocketLib\\": "."
+        }
+    }
+}
