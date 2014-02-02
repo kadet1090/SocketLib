@@ -6,9 +6,9 @@
 
 namespace Kadet\SocketLib;
 
-use Kadet\SocketLib\Utils\Event;
+use Kadet\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
-use Kadet\SocketLib\Utils\Property;
+use Kadet\Utils\Property;
 
 /**
  * Class SocketClient

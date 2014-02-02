@@ -1,9 +1,9 @@
 <?php
-include 'AutoLoader.php';
+include '../../Utils/AutoLoader.php';
 include 'functions.php';
 
-$loader = new \Kadet\SocketLib\Examples\AutoLoader('Kadet\\SocketLib', '..');
-$psrloader = new \Kadet\SocketLib\Examples\AutoLoader('Psr', '../Psr/');
+$loader = new \Kadet\Utils\AutoLoader('Kadet', '../..');
+$psrloader = new \Kadet\Utils\AutoLoader('Psr', '../Psr/');
 $loader->register();
 $psrloader->register();
 

@@ -9,8 +9,8 @@ namespace Kadet\SocketLib\Examples\WebSocket;
 
 
 use Kadet\SocketLib\SocketServer;
-use Kadet\SocketLib\Utils\Event;
-use Kadet\SocketLib\Utils\Property;
+use Kadet\Utils\Event;
+use Kadet\Utils\Property;
 
 class WebSocketServer extends SocketServer
 {
@@ -22,11 +22,14 @@ class WebSocketServer extends SocketServer
      */
     public $onMessage;
 
+    public $onInitialize;
+
     public $clientClass = 'Kadet\\SocketLib\\Examples\\WebSocket\\WebSocketServerClient';
 
     public function __construct($address, $port = 80)
     {
         $this->onMessage = new Event();
+        $this->onInitialize = new Event();
 
         parent::__construct(AF_INET, SOCK_STREAM, getprotobyname('tcp'), $address, $port);
         $this->onReceive->add([$this, '_onReceive']);
@@ -55,6 +58,7 @@ class WebSocketServer extends SocketServer
             }
 
             $client->handshake($headers);
+            $this->onInitialize->run($this, $client);
         } else {
             $frame = Frame::from($request);
 

@@ -6,7 +6,7 @@
 namespace Kadet\SocketLib\Examples\WebSocket;
 
 use Kadet\SocketLib\SocketServerClient;
-use Kadet\SocketLib\Utils\Property;
+use Kadet\Utils\Property;
 
 /**
  * Class WebSocketServerClient
@@ -27,7 +27,7 @@ class WebSocketServerClient extends SocketServerClient
 
     /**
      * Event triggered when message is received from client.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onMessage;
 

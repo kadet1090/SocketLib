@@ -5,9 +5,9 @@
  */
 namespace Kadet\SocketLib;
 
-use Kadet\SocketLib\Utils\Event;
+use Kadet\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
-use Kadet\SocketLib\Utils\Property;
+use Kadet\Utils\Property;
 
 /**
  * Class SocketServer
@@ -77,13 +77,13 @@ class SocketServer
 
     /**
      * Event triggered when server has been started.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onStart;
 
     /**
      * Event triggered when server has been stopped.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onStop;
 
@@ -95,31 +95,31 @@ class SocketServer
 
     /**
      * Event triggered when new client connects to the server.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onClientConnects;
 
     /**
      * Event triggered when client disconnects from the server.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onClientDisconnects;
 
     /**
      * Event triggered when server has received message from client.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onReceive;
 
     /**
      * Event triggered when server has sent message to client.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onSend;
 
     /**
      * Event triggered when some awful error occurred.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onError;
 
@@ -246,7 +246,7 @@ class SocketServer
                     unset($this->clients[$id]);
                 }
             } catch (NetworkException $e) {
-                $this->logger->warning($e->getMessage() . " ({$e->getCode()})");
+                if(isset($this->logger)) $this->logger->warning($e->getMessage() . " ({$e->getCode()})");
                 unset($this->clients[$id]);
             }
         }
@@ -262,5 +262,14 @@ class SocketServer
         $this->onClientConnects->run($this, $client);
         while ($client->read() !== false) ;
         $this->onClientDisconnects->run($this, $client);
+    }
+
+    /**
+     * Sends specified message to all connected clients.
+     * @param string $message Message to be sent.
+     */
+    public function broadcast($message) {
+        foreach($this->clients as $client)
+            $client->send($message);
     }
 } 
