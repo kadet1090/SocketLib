@@ -202,7 +202,6 @@ class SocketClient
 
     public function __destruct()
     {
-        echo 'test';
         if ($this->isConnected) $this->disconnect();
     }
 }
