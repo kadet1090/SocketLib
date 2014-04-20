@@ -63,7 +63,9 @@ class Logger extends AbstractLogger
      */
     public function emergency($message, array $context = array())
     {
-        echo "\033[1;31m[" . date('H:i:s') . "!!!]" . $message . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m!!! EMERGENCY " . date('H:i:s') . " !!!\033[0m" . PHP_EOL;
+        echo "\033[1;31m[" . date('H:i:s') . "!!!]" . $this->interpolate($message, $context) . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m!!! EMERGENCY " . date('H:i:s') . " !!!\033[0m" . PHP_EOL;
         parent::emergency($message, $context);
     }
 
@@ -73,7 +75,7 @@ class Logger extends AbstractLogger
     public function alert($message, array $context = array())
     {
         echo "\033[1;31m!!! ALERT " . date('H:i:s') . " !!!\033[0m" . PHP_EOL;
-        echo "\033[1;31m" . $message . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m" . $this->interpolate($message, $context) . " \033[0m" . PHP_EOL;
         parent::alert($message, $context);
     }
 
@@ -82,7 +84,7 @@ class Logger extends AbstractLogger
      */
     public function critical($message, array $context = array())
     {
-        echo "\033[1;31m[" . date('H:i:s') . " #]" . $message . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m[" . date('H:i:s') . " #]" . $this->interpolate($message, $context) . " \033[0m" . PHP_EOL;
         parent::critical($message, $context);
     }
 
@@ -91,7 +93,7 @@ class Logger extends AbstractLogger
      */
     public function error($message, array $context = array())
     {
-        echo "\033[1;31m[" . date('H:i:s') . " x] \033[0m" . $message . PHP_EOL;
+        echo "\033[1;31m[" . date('H:i:s') . " x] \033[0m" . $this->interpolate($message, $context) . PHP_EOL;
         parent::error($message, $context);
     }
 
@@ -100,7 +102,7 @@ class Logger extends AbstractLogger
      */
     public function warning($message, array $context = array())
     {
-        echo "\033[1;33m[" . date('H:i:s') . " !] \033[0m" . $message . PHP_EOL;
+        echo "\033[1;33m[" . date('H:i:s') . " !] \033[0m" . $this->interpolate($message, $context) . PHP_EOL;
         parent::warning($message, $context);
     }
 
@@ -109,7 +111,7 @@ class Logger extends AbstractLogger
      */
     public function notice($message, array $context = array())
     {
-        echo "\033[1;32m[" . date('H:i:s') . " *] \033[0m" . $message . PHP_EOL;
+        echo "\033[1;32m[" . date('H:i:s') . " *] \033[0m" . $this->interpolate($message, $context) . PHP_EOL;
         parent::notice($message, $context);
     }
 
@@ -118,7 +120,7 @@ class Logger extends AbstractLogger
      */
     public function info($message, array $context = array())
     {
-        echo "\033[1;32m[" . date('H:i:s') . " i] \033[0m" . $message . PHP_EOL;
+        echo "\033[1;32m[" . date('H:i:s') . " i] \033[0m" . $this->interpolate($message, $context) . PHP_EOL;
         parent::info($message, $context);
     }
 
@@ -128,7 +130,7 @@ class Logger extends AbstractLogger
     public function debug($message, array $context = array())
     {
         if ($this->debugLevel >= 1)
-            echo "\033[1;30m[" . date('H:i:s') . " ?] \033[0m" . $message . PHP_EOL;
+            echo "\033[1;30m[" . date('H:i:s') . " ?] \033[0m" . $this->interpolate($message, $context) . PHP_EOL;
         parent::debug($message, $context);
     }
 
