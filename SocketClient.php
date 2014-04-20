@@ -6,8 +6,8 @@
 
 namespace Kadet\SocketLib;
 
-use Kadet\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
+use Kadet\Utils\Event;
 use Kadet\Utils\Property;
 
 /**
@@ -45,31 +45,31 @@ class SocketClient
     # events
     /**
      * Event triggered when connection is successfully established.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onConnect;
 
     /**
      * Event triggered when client is disconnected from server.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onDisconnect;
 
     /**
      * Event triggered when some
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onError;
 
     /**
      * Event triggered when data is written to server.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onSend;
 
     /**
      * Event triggered when data is received to server.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onReceive;
 

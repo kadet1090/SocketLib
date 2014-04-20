@@ -1,11 +1,6 @@
 <?php
-include '../../Utils/AutoLoader.php';
 include 'functions.php';
-
-$loader = new \Kadet\Utils\AutoLoader('Kadet', '../..');
-$psrloader = new \Kadet\Utils\AutoLoader('Psr', '../Psr/');
-$loader->register();
-$psrloader->register();
+include '../vendor/autoload.php';
 
 switch ($argv[1]) {
     case 'http':

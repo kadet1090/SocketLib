@@ -5,15 +5,15 @@
  */
 namespace Kadet\SocketLib;
 
-use Kadet\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
+use Kadet\Utils\Event;
 use Kadet\Utils\Property;
 
 /**
  * Class SocketServerClient
  * @package Kadet\SocketLib
  * @internal
- * @todo documentation
+ * @todo    documentation
  */
 class SocketServerClient
 {
@@ -38,19 +38,19 @@ class SocketServerClient
     # events
     /**
      * Event triggered when some awful error occurred.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onError;
 
     /**
      * Event triggered when data is written to client.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onWrite;
 
     /**
      * Event triggered when data is received from client.
-     * @var \Kadet\SocketLib\Utils\Event
+     * @var \Kadet\Utils\Event
      */
     public $onRead;
 
@@ -62,25 +62,26 @@ class SocketServerClient
 
 
     /**
-     * @param resource $socket Client's socket.
+     * @param resource     $socket Client's socket.
      * @param SocketServer $server Client's server.
      */
     public function __construct($socket, SocketServer $server)
     {
-        $this->socket = $socket;
+        $this->socket  = $socket;
         $this->_server = $server;
-        $this->logger = $this->_server->logger;
+        $this->logger  = $this->_server->logger;
         socket_getpeername($this->socket, $this->_address);
 
-        $this->onConnect = new Event;
+        $this->onConnect    = new Event;
         $this->onDisconnect = new Event;
-        $this->onError = new Event;
-        $this->onWrite = new Event;
-        $this->onRead = new Event;
+        $this->onError      = new Event;
+        $this->onWrite      = new Event;
+        $this->onRead       = new Event;
     }
 
     /**
      * Sends message to client.
+     *
      * @param string $text Text to send to client.
      */
     public function send($text)
@@ -127,7 +128,7 @@ class SocketServerClient
      */
     private function _raiseError()
     {
-        $error['code'] = socket_last_error($this->socket);
+        $error['code']   = socket_last_error($this->socket);
         $error['string'] = trim(socket_strerror($error['code']));
         socket_clear_error($this->socket);
         if ($error['code'] == SOCKET_EINPROGRESS || $error['code'] == SOCKET_EWOULDBLOCK) return;
@@ -149,10 +150,5 @@ class SocketServerClient
     {
         socket_shutdown($this->socket);
         socket_close($this->socket);
-    }
-
-    public function _set_logger(Logger $logger)
-    {
-        $this->logger = $logger;
     }
 } 

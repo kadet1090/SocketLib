@@ -1,1 +1,3 @@
-Logs/
+/Logs/
+/vendor/
+.idea

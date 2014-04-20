@@ -21,6 +21,8 @@ class Logger extends AbstractLogger
         'default' => '',
     );
 
+    private $_handles = [];
+
     public function __construct($file, $debugLevel = null)
     {
         if (is_string($file))
@@ -36,15 +38,23 @@ class Logger extends AbstractLogger
             if (!file_exists(self::$directory . '/' . $current)) touch(self::$directory . '/' . $current);
     }
 
+    public function __destruct()
+    {
+        foreach ($this->_handles as $handle)
+            fclose($handle);
+    }
+
     /**
      * {@inheritdoc}
      */
     public function log($level, $message, array $context = array())
     {
-        file_put_contents(
-            self::$directory . (isset($this->_file[$level]) ? $this->_file[$level] : $this->_file['default']),
-            '[' . date('H:i:s') . '] ' . $this->interpolate($message, $context) . PHP_EOL,
-            FILE_APPEND
+        if (!isset($this->_handles[$this->getPath($level)]))
+            $this->_handles[$this->getPath($level)] = fopen($this->getPath($level), 'a');
+
+        fwrite(
+            $this->_handles[$this->getPath($level)],
+            '[' . date('H:i:s') . '] ' . $this->interpolate($message, $context) . PHP_EOL
         );
     }
 
@@ -53,7 +63,7 @@ class Logger extends AbstractLogger
      */
     public function emergency($message, array $context = array())
     {
-        echo "\033[1;31m[" . date('H:i:s') . " emergency]" . $message . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m[" . date('H:i:s') . "!!!]" . $message . " \033[0m" . PHP_EOL;
         parent::emergency($message, $context);
     }
 
@@ -72,7 +82,7 @@ class Logger extends AbstractLogger
      */
     public function critical($message, array $context = array())
     {
-        echo "\033[1;31m[" . date('H:i:s') . " critical]" . $message . " \033[0m" . PHP_EOL;
+        echo "\033[1;31m[" . date('H:i:s') . " #]" . $message . " \033[0m" . PHP_EOL;
         parent::critical($message, $context);
     }
 
@@ -129,5 +139,10 @@ class Logger extends AbstractLogger
             $replace["{{$key}}"] = $value;
 
         return str_replace(array_keys($replace), array_values($replace), $message);
+    }
+
+    private function getPath($level)
+    {
+        return self::$directory . (isset($this->_file[$level]) ? $this->_file[$level] : $this->_file['default']);
     }
 }
