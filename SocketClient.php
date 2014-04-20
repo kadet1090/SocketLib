@@ -194,7 +194,7 @@ class SocketClient
     /**
      * @throws NetworkException
      */
-    private function raiseError()
+    protected function raiseError()
     {
         $this->onError->run($this, (int)$this->_error['code'], $this->_error['string']);
         throw new NetworkException($this->_error['string'], $this->_error['code']);
