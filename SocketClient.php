@@ -7,17 +7,14 @@
 namespace Kadet\SocketLib;
 
 use Kadet\SocketLib\Utils\Logger;
-use Kadet\Utils\Event;
 use Kadet\Utils\Property;
 
 /**
  * Class SocketClient
  * @package Kadet\SocketLib
  */
-class SocketClient
+class SocketClient extends AbstractClient
 {
-    use Property;
-
     /**
      * Server which client is connected to.
      * @var string
@@ -42,42 +39,11 @@ class SocketClient
      */
     protected $_timeout;
 
-    # events
-    /**
-     * Event triggered when connection is successfully established.
-     * @var \Kadet\Utils\Event
-     */
-    public $onConnect;
-
-    /**
-     * Event triggered when client is disconnected from server.
-     * @var \Kadet\Utils\Event
-     */
-    public $onDisconnect;
-
-    /**
-     * Event triggered when some
-     * @var \Kadet\Utils\Event
-     */
-    public $onError;
-
-    /**
-     * Event triggered when data is written to server.
-     * @var \Kadet\Utils\Event
-     */
-    public $onSend;
-
-    /**
-     * Event triggered when data is received to server.
-     * @var \Kadet\Utils\Event
-     */
-    public $onReceive;
-
     /**
      * Determines if client is connected to server.
      * @var bool
      */
-    public $isConnected;
+    protected $_connected;
 
     /**
      * Clients sockets resource.
@@ -108,20 +74,16 @@ class SocketClient
      */
     public function __construct($address, $port, $transport = 'tcp', $timeout = 30)
     {
+        parent::__construct();
+
         $this->_address   = $address;
         $this->_port      = $port;
         $this->_timeout   = $timeout;
         $this->_transport = $transport;
-
-        $this->onConnect    = new Event;
-        $this->onDisconnect = new Event;
-        $this->onError      = new Event;
-        $this->onSend       = new Event;
-        $this->onReceive    = new Event;
     }
 
     /**
-     * Connects to specified server.
+     * Connects to specified source.
      *
      * @param bool $blocking Blocking or not blocking mode.
      */
@@ -139,7 +101,7 @@ class SocketClient
 
         stream_set_blocking($this->_socket, $blocking);
 
-        $this->isConnected = true;
+        $this->_connected = true;
         $this->onConnect->run($this);
     }
 
@@ -147,10 +109,8 @@ class SocketClient
     {
         $this->receive(); // perform last read, to be sure that everything is received.
 
-        $this->isConnected = false;
+        $this->_connected = false;
         $this->onDisconnect->run($this);
-        //stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
-        //socket_close($this->_socket);
     }
 
     /**
@@ -172,7 +132,7 @@ class SocketClient
      */
     public function receive()
     {
-        if (!$this->isConnected) return false;
+        if (!$this->_connected) return false;
 
         $result = '';
         do {
@@ -202,6 +162,19 @@ class SocketClient
 
     public function __destruct()
     {
-        if ($this->isConnected) $this->disconnect();
+        if ($this->_connected) $this->disconnect();
+    }
+
+    public function _get_connected()
+    {
+        return $this->_connected;
+    }
+
+    public function _set_blocking($blocking)
+    {
+        if (!$this->_connected)
+            $this->onError->run($this, 1, 'You need to be connected to change blocking mode.');
+
+        stream_set_blocking($this->_socket, (bool)$blocking);
     }
 }

@@ -5,7 +5,6 @@
  */
 namespace Kadet\SocketLib;
 
-use Kadet\Utils\Event;
 use Kadet\SocketLib\Utils\Logger;
 use Kadet\Utils\Property;
 
@@ -16,10 +15,8 @@ use Kadet\Utils\Property;
  * @property bool $blocking Indicates if server is blocking or not.
  * @property bool $running  Indicates if server is running or not.
  */
-class SocketServer
+class SocketServer extends AbstractServer
 {
-    use Property;
-
     /**
      * Servers address
      * @var string
@@ -76,52 +73,10 @@ class SocketServer
     public $logger;
 
     /**
-     * Event triggered when server has been started.
-     * @var \Kadet\Utils\Event
-     */
-    public $onStart;
-
-    /**
-     * Event triggered when server has been stopped.
-     * @var \Kadet\Utils\Event
-     */
-    public $onStop;
-
-    /**
      * @see $running
      * @var bool
      */
     protected $_running;
-
-    /**
-     * Event triggered when new client connects to the server.
-     * @var \Kadet\Utils\Event
-     */
-    public $onClientConnects;
-
-    /**
-     * Event triggered when client disconnects from the server.
-     * @var \Kadet\Utils\Event
-     */
-    public $onClientDisconnects;
-
-    /**
-     * Event triggered when server has received message from client.
-     * @var \Kadet\Utils\Event
-     */
-    public $onReceive;
-
-    /**
-     * Event triggered when server has sent message to client.
-     * @var \Kadet\Utils\Event
-     */
-    public $onSend;
-
-    /**
-     * Event triggered when some awful error occurred.
-     * @var \Kadet\Utils\Event
-     */
-    public $onError;
 
     public $clientClass = 'Kadet\\SocketLib\\SocketServerClient';
 
@@ -140,13 +95,7 @@ class SocketServer
         $this->_address  = $address;
         $this->_port     = $port;
 
-        $this->onClientConnects    = new Event;
-        $this->onClientDisconnects = new Event;
-        $this->onStart             = new Event;
-        $this->onStop              = new Event;
-        $this->onReceive           = new Event;
-        $this->onSend              = new Event;
-        $this->onError             = new Event;
+        parent::__construct(); // init events
 
         $this->onStart->add(function ($server) {
             if (isset($this->logger)) $this->logger->info("Server has been started.");
@@ -162,11 +111,7 @@ class SocketServer
         });
     }
 
-    /**
-     * Starts server.
-     *
-     * @param int $backlog Max limit of queued clients.
-     */
+    /** {@inheritdoc} */
     public function start($backlog = 0)
     {
         $this->_socket = socket_create($this->_domain, $this->_type, $this->_protocol);
@@ -177,9 +122,7 @@ class SocketServer
         $this->_running = true;
     }
 
-    /**
-     * Stops server.
-     */
+    /** {@inheritdoc} */
     public function stop()
     {
         $this->onStop->run($this);
@@ -189,10 +132,7 @@ class SocketServer
         socket_close($this->_socket);
     }
 
-    /**
-     * Handles incoming connections.
-     * Should be run on every tick of your main program loop.
-     */
+    /** {@inheritdoc} */
     public function handleConnections()
     {
         if ($this->blocking)
@@ -246,7 +186,7 @@ class SocketServer
                     unset($this->clients[$id]);
                 }
             } catch (NetworkException $e) {
-                if(isset($this->logger)) $this->logger->warning($e->getMessage() . " ({$e->getCode()})");
+                if (isset($this->logger)) $this->logger->warning($e->getMessage() . " ({$e->getCode()})");
                 unset($this->clients[$id]);
             }
         }
@@ -264,12 +204,10 @@ class SocketServer
         $this->onClientDisconnects->run($this, $client);
     }
 
-    /**
-     * Sends specified message to all connected clients.
-     * @param string $message Message to be sent.
-     */
-    public function broadcast($message) {
-        foreach($this->clients as $client)
+    /** {@inheritdoc} */
+    public function broadcast($message)
+    {
+        foreach ($this->clients as $client)
             $client->send($message);
     }
 } 

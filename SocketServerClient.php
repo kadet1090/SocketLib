@@ -6,7 +6,6 @@
 namespace Kadet\SocketLib;
 
 use Kadet\SocketLib\Utils\Logger;
-use Kadet\Utils\Event;
 use Kadet\Utils\Property;
 
 /**
@@ -15,7 +14,7 @@ use Kadet\Utils\Property;
  * @internal
  * @todo    documentation
  */
-class SocketServerClient
+class SocketServerClient extends AbstractServerClient
 {
     /**
      * Clients IP Address
@@ -36,23 +35,6 @@ class SocketServerClient
     public $socket;
 
     # events
-    /**
-     * Event triggered when some awful error occurred.
-     * @var \Kadet\Utils\Event
-     */
-    public $onError;
-
-    /**
-     * Event triggered when data is written to client.
-     * @var \Kadet\Utils\Event
-     */
-    public $onWrite;
-
-    /**
-     * Event triggered when data is received from client.
-     * @var \Kadet\Utils\Event
-     */
-    public $onRead;
 
     /**
      * Logger instance, to log important, not so important messages like debug.
@@ -67,23 +49,15 @@ class SocketServerClient
      */
     public function __construct($socket, SocketServer $server)
     {
+        parent::__construct();
+
         $this->socket  = $socket;
         $this->_server = $server;
         $this->logger  = $this->_server->logger;
         socket_getpeername($this->socket, $this->_address);
-
-        $this->onConnect    = new Event;
-        $this->onDisconnect = new Event;
-        $this->onError      = new Event;
-        $this->onWrite      = new Event;
-        $this->onRead       = new Event;
     }
 
-    /**
-     * Sends message to client.
-     *
-     * @param string $text Text to send to client.
-     */
+    /** {@inheritdoc} */
     public function send($text)
     {
         $left = strlen($text);
@@ -99,10 +73,7 @@ class SocketServerClient
         if (isset($this->logger)) $this->logger->debug("Sent " . strlen($text) . " bytes to {$this}: {$text}");
     }
 
-    /**
-     * Reads data from client.
-     * @return string|bool String on success, empty if no data to be received, or false if client has disconnected.
-     */
+    /** {@inheritdoc} */
     public function read()
     {
         $result = '';
@@ -151,4 +122,12 @@ class SocketServerClient
         socket_shutdown($this->socket);
         socket_close($this->socket);
     }
-} 
+
+    /**
+     * @return AbstractServer
+     */
+    function _get_server()
+    {
+        return $this->_server;
+    }
+}

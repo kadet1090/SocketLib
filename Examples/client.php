@@ -12,7 +12,7 @@ while (true) {
     if ($read == 'exit') break;
 
     $client->send($read);
-    usleep(5000);
+    usleep(2000);
     $client->receive();
 }
 $client->disconnect();

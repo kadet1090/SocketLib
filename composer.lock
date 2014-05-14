@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kadet1090/Utils.git",
-                "reference": "f646b791ec514e939b6540b1678c6370c807222a"
+                "reference": "6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kadet1090/Utils/zipball/f646b791ec514e939b6540b1678c6370c807222a",
-                "reference": "f646b791ec514e939b6540b1678c6370c807222a",
+                "url": "https://api.github.com/repos/kadet1090/Utils/zipball/6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb",
+                "reference": "6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb",
                 "shasum": ""
             },
             "require": {
@@ -26,7 +26,10 @@
             "autoload": {
                 "psr-4": {
                     "Kadet\\Utils\\": "."
-                }
+                },
+                "files": [
+                    "functions.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -49,7 +52,7 @@
                 "utilities",
                 "utils"
             ],
-            "time": "2014-04-19 23:52:16"
+            "time": "2014-05-13 16:17:00"
         },
         {
             "name": "psr/log",

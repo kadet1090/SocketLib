@@ -23,7 +23,8 @@ switch ($argv[1]) {
 $server->logger = new \Kadet\SocketLib\Utils\Logger(['default' => 'default.log', 'debug' => 'debug.log']);
 $server->start();
 $server->blocking = false;
+
 while (true) {
     $server->handleConnections();
-    usleep(10000);
+    usleep(250);
 }

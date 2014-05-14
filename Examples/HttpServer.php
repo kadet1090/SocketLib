@@ -22,9 +22,9 @@ class HttpServer extends SocketServer
     }
 
     /**
-     * @param SocketServer $server
+     * @param SocketServer       $server
      * @param SocketServerClient $client
-     * @param string $request
+     * @param string             $request
      */
     public function _onReceive($server, $client, $request)
     {
@@ -38,7 +38,7 @@ class HttpServer extends SocketServer
                 'Server: SocketLibHttpServer/1.0',
                 'Date: ' . date(DATE_RFC1123),
                 'Content-Type: ' . mime_content_type("./public_html{$url}"),
-                //'Content-Length: '.strlen($content),
+                'Content-Length: ' . strlen($content),
                 'Connection: close'
             ];
         } else {
@@ -48,11 +48,12 @@ class HttpServer extends SocketServer
                 'Server: SocketLibHttpServer/1.0',
                 'Date: ' . date(DATE_RFC1123),
                 'Content-Type: text/html; charset=utf-8',
-                //'Content-Length: '.strlen($content),
+                'Content-Length: ' . strlen($content),
                 'Connection: close'
             ];
         }
+
         $client->send(implode("\r\n", $headers) . "\r\n\r\n" . $content);
-        //$client->close();
+        $client->close();
     }
 } 
