@@ -124,7 +124,7 @@ class SocketClient extends AbstractClient
      */
     public function send($text)
     {
-        if (!fwrite($this->_socket, $text)) {
+        if (!@fwrite($this->_socket, $text)) {
             $this->raiseError();
         } else {
             $this->onSend->run($this, $text);

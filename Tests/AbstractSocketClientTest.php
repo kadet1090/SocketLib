@@ -80,9 +80,83 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($string, $this->_client->receive());
     }
 
+    public function testEventOnConnect()
+    {
+        $mock = $this->getMock('stdClass', ['test']);
+        $mock
+            ->expects($this->once())
+            ->method('test')
+            ->with($this->equalTo($this->_client));
+
+        $this->_client->onConnect->add([$mock, 'test']);
+        $this->_client->connect();
+        $this->assertTrue($this->_server->accept() !== false);
+    }
+
+    public function testEventOnDisconnect()
+    {
+        $mock = $this->getMock('stdClass', ['test']);
+        $mock
+            ->expects($this->once())
+            ->method('test')
+            ->with($this->equalTo($this->_client));
+
+        $this->_client->onDisconnect->add([$mock, 'test']);
+        $this->_client->disconnect();
+    }
+
+    /**
+     * @dataProvider asciiProvider
+     */
+    public function testEventOnReceive($string)
+    {
+        $mock = $this->getMock('stdClass', ['test']);
+        $mock
+            ->expects($this->once())
+            ->method('test')
+            ->with($this->equalTo($this->_client), $this->equalTo($string));
+
+        $this->_client->onReceive->add([$mock, 'test']);
+        $this->_server->write($string);
+        $this->_client->receive();
+    }
+
+    /**
+     * @dataProvider asciiProvider
+     */
+    public function testEventOnSend($string)
+    {
+        $mock = $this->getMock('stdClass', ['test']);
+        $mock
+            ->expects($this->once())
+            ->method('test')
+            ->with($this->equalTo($this->_client), $this->equalTo($string));
+
+        $this->_client->onSend->add([$mock, 'test']);
+        $this->_client->send($string);
+    }
+
+    /**
+     * @dataProvider asciiProvider
+     * @expectedException \Kadet\SocketLib\NetworkException
+     */
+    public function testEventOnError($string)
+    {
+        $mock = $this->getMock('stdClass', ['test']);
+        $mock
+            ->expects($this->once())
+            ->method('test')
+            ->with($this->equalTo($this->_client), $this->anything());
+
+        $this->_client->onError->add([$mock, 'test']);
+        $this->_client->disconnect();
+        $this->_client->send($string);
+    }
+
     public function tearDown()
     {
         unset($this->_server);
+        unset($this->_client);
     }
 
     public function asciiProvider()
@@ -108,4 +182,3 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
         ];
     }
 }
- 
