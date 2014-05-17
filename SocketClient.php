@@ -51,6 +51,8 @@ class SocketClient extends AbstractClient
      */
     protected $_socket;
 
+    protected $_blocking;
+
     /**
      * Last error data.
      * @var array
@@ -72,7 +74,7 @@ class SocketClient extends AbstractClient
      * @param string $transport Servers transport.
      * @param int    $timeout   Connection timeout.
      */
-    public function __construct($address, $port, $transport = 'tcp', $timeout = 30)
+    public function __construct($address, $port, $transport = 'tcp', $timeout = 10)
     {
         parent::__construct();
 
@@ -89,25 +91,27 @@ class SocketClient extends AbstractClient
      */
     public function connect($blocking = true)
     {
-        $this->_socket = stream_socket_client(
+        $this->_socket = @stream_socket_client(
             "{$this->_transport}://{$this->_address}:{$this->_port}",
             $this->_error['code'],
             $this->_error['string'],
             $this->_timeout
         );
 
-        if (!$this->_socket)
+        if (!$this->_socket) {
             $this->raiseError();
+        }
 
-        stream_set_blocking($this->_socket, $blocking);
+        stream_set_blocking($this->_socket, 0);
 
+        $this->_blocking  = $blocking;
         $this->_connected = true;
         $this->onConnect->run($this);
     }
 
     public function disconnect()
     {
-        $this->receive(); // perform last read, to be sure that everything is received.
+        stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
 
         $this->_connected = false;
         $this->onDisconnect->run($this);
@@ -120,10 +124,11 @@ class SocketClient extends AbstractClient
      */
     public function send($text)
     {
-        if (!fwrite($this->_socket, $text))
+        if (!fwrite($this->_socket, $text)) {
             $this->raiseError();
-        else
+        } else {
             $this->onSend->run($this, $text);
+        }
     }
 
     /**
@@ -134,7 +139,8 @@ class SocketClient extends AbstractClient
     {
         if (!$this->_connected) return false;
 
-        $result = '';
+        $result = null;
+        $start  = microtime(true);
         do {
             if (($content = stream_get_contents($this->_socket)) === false) {
                 $this->disconnect();
@@ -143,10 +149,16 @@ class SocketClient extends AbstractClient
                 return false;
             }
             $result .= $content;
-        } while (!empty($content) && !empty($result));
 
-        if (!empty($result))
+            if (microtime(true) - $start > $this->_timeout) return $result;
+        } while (
+            ($this->_blocking && empty($result)) ||
+            (!$this->_blocking && !empty($content) && !empty($result))
+        );
+
+        if (!empty($result)) {
             $this->onReceive->run($this, $result);
+        }
 
         return trim($result);
     }
@@ -172,9 +184,15 @@ class SocketClient extends AbstractClient
 
     public function _set_blocking($blocking)
     {
-        if (!$this->_connected)
+        if (!$this->_connected) {
             $this->onError->run($this, 1, 'You need to be connected to change blocking mode.');
+        }
 
-        stream_set_blocking($this->_socket, (bool)$blocking);
+        $this->_blocking = (bool)$blocking;
+    }
+
+    public function _set_timeout($timeout)
+    {
+        $this->_timeout = intval($timeout);
     }
 }

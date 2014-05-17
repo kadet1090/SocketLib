@@ -62,7 +62,7 @@ class SocketServerClient extends AbstractServerClient
     {
         $left = strlen($text);
         do {
-            $written = socket_write($this->socket, $text);
+            $written = @socket_write($this->socket, $text);
             if ($written === false) $this->_raiseError();
             $left -= $written;
         } while ($left > 0);
