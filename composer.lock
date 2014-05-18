@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kadet1090/Utils.git",
-                "reference": "6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb"
+                "reference": "9fc84366feebee6d4615da4b8cd6e2c8abbdef8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kadet1090/Utils/zipball/6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb",
-                "reference": "6c14e5b5a0214f2df9252a1c7ae9e9d36630aadb",
+                "url": "https://api.github.com/repos/kadet1090/Utils/zipball/9fc84366feebee6d4615da4b8cd6e2c8abbdef8c",
+                "reference": "9fc84366feebee6d4615da4b8cd6e2c8abbdef8c",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "utilities",
                 "utils"
             ],
-            "time": "2014-05-13 16:17:00"
+            "time": "2014-05-13 21:34:49"
         },
         {
             "name": "psr/log",
