@@ -40,7 +40,13 @@ class StubServer
 
     public function read()
     {
-        return socket_read($this->_client, 1024);
+        $result = null;
+        do {
+            $data = socket_read($this->_client, 255);
+            $result .= $data;
+        } while (strlen($data) === 255);
+
+        return $result;
     }
 
     public function write($buffer)

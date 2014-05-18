@@ -12,8 +12,10 @@ use Kadet\Utils\Property;
  * Class SocketServer
  * @package Kadet\SocketLib
  *
- * @property bool $blocking Indicates if server is blocking or not.
- * @property bool $running  Indicates if server is running or not.
+ * @property      bool   $blocking Indicates if server is blocking or not.
+ * @property-read bool   $running  Indicates if server is running or not.
+ * @property-read string $address  Servers address.
+ * @property-read int    $port     Servers port.
  */
 class SocketServer extends AbstractServer
 {
@@ -76,7 +78,7 @@ class SocketServer extends AbstractServer
      * @see $running
      * @var bool
      */
-    protected $_running;
+    protected $_running = false;
 
     public $clientClass = 'Kadet\\SocketLib\\SocketServerClient';
 
@@ -118,6 +120,12 @@ class SocketServer extends AbstractServer
         socket_bind($this->_socket, $this->_address, $this->_port);
         socket_listen($this->_socket, $backlog);
 
+        if ($this->_blocking) {
+            socket_set_block($this->_socket);
+        } else {
+            socket_set_nonblock($this->_socket);
+        }
+
         $this->onStart->run($this);
         $this->_running = true;
     }
@@ -127,18 +135,17 @@ class SocketServer extends AbstractServer
     {
         $this->onStop->run($this);
         $this->_running = false;
-
-        socket_shutdown($this->_socket);
         socket_close($this->_socket);
     }
 
     /** {@inheritdoc} */
     public function handleConnections()
     {
-        if ($this->blocking)
+        if ($this->blocking) {
             $this->_blockHandle();
-        else
+        } else {
             $this->_nonblockHandle();
+        }
     }
 
     public function _get_blocking()
@@ -149,13 +156,10 @@ class SocketServer extends AbstractServer
     public function _set_blocking($blocking)
     {
         if (!is_bool($blocking)) throw new \InvalidArgumentException('$blocking must be bool, ' . gettype($blocking) . ' given.');
-
-        if ($blocking)
-            socket_set_block($this->_socket);
-        else
-            socket_set_nonblock($this->_socket);
-
         $this->_blocking = $blocking;
+
+        if (!$this->_running) return;
+        $blocking ? socket_set_block($this->_socket) : socket_set_nonblock($this->_socket);
     }
 
     public function _get_running()
@@ -187,6 +191,7 @@ class SocketServer extends AbstractServer
                 }
             } catch (NetworkException $e) {
                 if (isset($this->logger)) $this->logger->warning($e->getMessage() . " ({$e->getCode()})");
+                $this->onClientDisconnects->run($this, $this->clients[$id]);
                 unset($this->clients[$id]);
             }
         }
@@ -209,5 +214,19 @@ class SocketServer extends AbstractServer
     {
         foreach ($this->clients as $client)
             $client->send($message);
+    }
+
+    public function _get_port()
+    {
+        if ($this->_port == 0) {
+            socket_getsockname($this->_socket, $addr, $this->_port);
+        }
+
+        return $this->_port;
+    }
+
+    public function _get_address()
+    {
+        return $this->_address;
     }
 } 

@@ -19,6 +19,8 @@ use Kadet\SocketLib\Tests\Stubs\StubServer;
 
 abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
 {
+    use TextProvider;
+
     /**
      * @var StubServer
      */
@@ -32,7 +34,7 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
     public function testConnection()
     {
         $this->_client->connect();
-        $this->assertTrue($this->_server->accept() !== false);
+        $this->assertNotSame(false, $this->_server->accept());
     }
 
     /**
@@ -42,6 +44,14 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new SocketClient('hostthatdoesntexist', 1561/** because yes, or no, oh come on i don't know such things... */);
         $client->connect();
+    }
+
+    public function testConnected()
+    {
+        $this->_client->connect();
+        $this->assertTrue($this->_client->connected);
+        $this->_client->disconnect();
+        $this->assertFalse($this->_client->connected);
     }
 
     /**
@@ -90,7 +100,7 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
 
         $this->_client->onConnect->add([$mock, 'test']);
         $this->_client->connect();
-        $this->assertTrue($this->_server->accept() !== false);
+        $this->assertNotSame(false, $this->_server->accept());
     }
 
     public function testEventOnDisconnect()
@@ -157,28 +167,5 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
     {
         unset($this->_server);
         unset($this->_client);
-    }
-
-    public function asciiProvider()
-    {
-        return [
-            ['text'],
-            [str_repeat('x', 1000)],
-            ['jGQLVcIgnyN0y6r8o3j0butvmZPj6CLE4Wi1ymXIA1rbG2Kz4Uuv3CvAgjbwVnjrJdmGFpNPsO4ObjuPvQlCBqnugUgBifRIQmXVxYTJXyg4XErifJ4CGWtB'],
-        ];
-    }
-
-    public function utf8Provider()
-    {
-        return [
-            ['ᛋᚳᛖᚪᛚ᛫ᚦᛖᚪᚻ᛫ᛗᚪᚾᚾᚪ᛫ᚷᛖᚻᚹᛦᛚᚳ᛫ᛗᛁᚳᛚᚢᚾ᛫ᚻᛦᛏ᛫ᛞᚫᛚᚪᚾ'],
-            ['He wonede at Ernleȝe at æðelen are chirechen'],
-            ['τὸ σπίτι φτωχικὸ στὶς ἀμμουδιὲς τοῦ Ὁμήρου.'],
-            ['�����������������������������'],
-            ['И вдаль глядел. Пред ним широко'],
-            ['ვეპხის ტყაოსანი შოთა რუსთაველი'],
-            ['யாமறிந்த மொழிகளிலே தமிழ்மொழி போல்'],
-            ['Mogę jeść szkło i mi nie szkodzi.']
-        ];
     }
 }

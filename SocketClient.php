@@ -43,7 +43,7 @@ class SocketClient extends AbstractClient
      * Determines if client is connected to server.
      * @var bool
      */
-    protected $_connected;
+    protected $_connected = false;
 
     /**
      * Clients sockets resource.
@@ -98,9 +98,8 @@ class SocketClient extends AbstractClient
             $this->_timeout
         );
 
-        if (!$this->_socket) {
+        if (!$this->_socket)
             $this->raiseError();
-        }
 
         stream_set_blocking($this->_socket, 0);
 
@@ -124,11 +123,10 @@ class SocketClient extends AbstractClient
      */
     public function send($text)
     {
-        if (!@fwrite($this->_socket, $text)) {
+        if (!@fwrite($this->_socket, $text))
             $this->raiseError();
-        } else {
+        else
             $this->onSend->run($this, $text);
-        }
     }
 
     /**
@@ -184,10 +182,6 @@ class SocketClient extends AbstractClient
 
     public function _set_blocking($blocking)
     {
-        if (!$this->_connected) {
-            $this->onError->run($this, 1, 'You need to be connected to change blocking mode.');
-        }
-
         $this->_blocking = (bool)$blocking;
     }
 
