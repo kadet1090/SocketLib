@@ -29,6 +29,7 @@ class StubClient
         if (!$this->_socket) throw new \RuntimeException('Could not connect to server');
 
         stream_set_blocking($this->_socket, false);
+        stream_set_timeout($this->_socket, 1);
     }
 
     public function read()
