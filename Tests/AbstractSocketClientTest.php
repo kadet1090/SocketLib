@@ -99,8 +99,11 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo($this->_client));
 
         $this->_client->onConnect->add([$mock, 'test']);
+        echo 'travis';
         $this->_client->connect();
+        echo 'debugging';
         $this->assertNotSame(false, $this->_server->accept());
+        echo 'kurwa';
     }
 
     public function testEventOnDisconnect()
