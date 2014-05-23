@@ -27,7 +27,7 @@ class StubClient
     {
         echo "kurwa";
         flush();
-        $this->_socket = stream_socket_client($this->_host, $err, $err, 0, STREAM_CLIENT_ASYNC_CONNECT);
+        //$this->_socket = stream_socket_client($this->_host, $err, $err, 0, STREAM_CLIENT_ASYNC_CONNECT);
         echo "kurwa";
         flush();
         stream_set_blocking($this->_socket, 0);
