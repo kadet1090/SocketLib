@@ -16,7 +16,6 @@ namespace Kadet\SocketLib\Tests;
 
 use Kadet\SocketLib\SocketServer;
 use Kadet\SocketLib\Tests\Stubs\StubClient;
-use Kadet\SocketLib\Utils\Logger;
 
 class SocketServerTest extends \PHPUnit_Framework_TestCase
 {
@@ -91,11 +90,9 @@ class SocketServerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo($this->_server), $this->isInstanceOf('Kadet\\SocketLib\\SocketServerClient'));
 
         $this->_server->onClientConnects->add([$mock, 'test']);
-        $this->_server->logger = new Logger('log.log');
         $this->_server->start();
-        sleep(1);
         $client = new StubClient('tcp://' . $this->_server->address . ':' . $this->_server->port);
-        $client->connect();
+        //$client->connect();
 
         $this->_server->handleConnections();
     }
