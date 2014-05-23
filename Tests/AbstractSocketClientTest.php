@@ -100,6 +100,7 @@ abstract class AbstractSocketClientTest extends \PHPUnit_Framework_TestCase
 
         $this->_client->onConnect->add([$mock, 'test']);
         $this->_client->connect();
+        echo "kurwa";
         $this->assertNotSame(false, $this->_server->accept());
     }
 
