@@ -83,27 +83,18 @@ class SocketServerTest extends \PHPUnit_Framework_TestCase
 
     public function testEventOnClientConnects()
     {
-        echo "1";
-        flush();
         $mock = $this->getMock('stdClass', ['test']);
-        echo "1";
-        flush();
         $mock
             ->expects($this->once())
             ->method('test')
             ->with($this->equalTo($this->_server), $this->isInstanceOf('Kadet\\SocketLib\\SocketServerClient'));
-        echo "1";
-        flush();
+
         $this->_server->onClientConnects->add([$mock, 'test']);
-        echo "2";
-        flush();
         $this->_server->start();
-        echo "3";
-        flush();
+
         $client = new StubClient('tcp://' . $this->_server->address . ':' . $this->_server->port);
-        //$client->connect();
-        echo "4";
-        flush();
+        $client->connect();
+
         $this->_server->handleConnections();
     }
 

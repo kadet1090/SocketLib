@@ -25,7 +25,7 @@ class StubClient
 
     public function connect()
     {
-        $this->_socket = stream_socket_client($this->_host);
+        $this->_socket = stream_socket_client($this->_host, $err, $err, null, STREAM_CLIENT_ASYNC_CONNECT);
         if (!$this->_socket) throw new \RuntimeException('Could not connect to server');
 
         stream_set_blocking($this->_socket, false);
