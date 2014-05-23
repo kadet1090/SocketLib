@@ -83,7 +83,9 @@ class SocketServerTest extends \PHPUnit_Framework_TestCase
 
     public function testEventOnClientConnects()
     {
+        echo "1";
         $mock = $this->getMock('stdClass', ['test']);
+        echo "1";
         $mock
             ->expects($this->once())
             ->method('test')
