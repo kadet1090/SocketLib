@@ -88,13 +88,14 @@ class SocketServerTest extends \PHPUnit_Framework_TestCase
             ->expects($this->once())
             ->method('test')
             ->with($this->equalTo($this->_server), $this->isInstanceOf('Kadet\\SocketLib\\SocketServerClient'));
-
+        echo "1";
         $this->_server->onClientConnects->add([$mock, 'test']);
+        echo "2";
         $this->_server->start();
-        echo "test";
+        echo "3";
         $client = new StubClient('tcp://' . $this->_server->address . ':' . $this->_server->port);
         $client->connect();
-        echo "test";
+        echo "4";
         $this->_server->handleConnections();
     }
 
