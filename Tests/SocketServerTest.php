@@ -91,10 +91,10 @@ class SocketServerTest extends \PHPUnit_Framework_TestCase
 
         $this->_server->onClientConnects->add([$mock, 'test']);
         $this->_server->start();
-
+        echo "test";
         $client = new StubClient('tcp://' . $this->_server->address . ':' . $this->_server->port);
         $client->connect();
-
+        echo "test";
         $this->_server->handleConnections();
     }
 
