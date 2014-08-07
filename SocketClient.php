@@ -185,6 +185,19 @@ class SocketClient extends AbstractClient
         $this->_blocking = (bool)$blocking;
     }
 
+    public function _set_encryption($encryption)
+    {
+        stream_set_blocking($this->_socket, true);
+        if ($encryption) {
+            $encryption = $encryption === true ? STREAM_CRYPTO_METHOD_TLS_CLIENT : $encryption;
+
+            stream_socket_enable_crypto($this->_socket, true, $encryption);
+        } else {
+            stream_socket_enable_crypto($this->_socket, false);
+        }
+        stream_set_blocking($this->_socket, false);
+    }
+
     public function _set_timeout($timeout)
     {
         $this->_timeout = intval($timeout);
