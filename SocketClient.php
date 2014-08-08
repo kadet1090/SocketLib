@@ -12,6 +12,8 @@ use Kadet\Utils\Property;
 /**
  * Class SocketClient
  * @package Kadet\SocketLib
+ *
+ * @property bool|int $encryption Used to enable/disable encryption.
  */
 class SocketClient extends AbstractClient
 {
@@ -52,6 +54,8 @@ class SocketClient extends AbstractClient
     protected $_socket;
 
     protected $_blocking;
+
+    protected $_encryption = false;
 
     /**
      * Last error data.
@@ -185,6 +189,11 @@ class SocketClient extends AbstractClient
         $this->_blocking = (bool)$blocking;
     }
 
+    public function _get_encryption()
+    {
+        return $this->_encryption;
+    }
+
     public function _set_encryption($encryption)
     {
         stream_set_blocking($this->_socket, true);
@@ -195,6 +204,7 @@ class SocketClient extends AbstractClient
         } else {
             stream_socket_enable_crypto($this->_socket, false);
         }
+        $this->_encryption = $encryption;
         stream_set_blocking($this->_socket, false);
     }
 
