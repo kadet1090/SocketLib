@@ -42,12 +42,6 @@ class SocketClient extends AbstractClient
     protected $_timeout;
 
     /**
-     * Determines if client is connected to server.
-     * @var bool
-     */
-    protected $_connected = false;
-
-    /**
      * Clients sockets resource.
      * @var Resource
      */
@@ -115,8 +109,6 @@ class SocketClient extends AbstractClient
     public function disconnect()
     {
         stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
-
-        $this->_connected = false;
         $this->onDisconnect->run($this);
     }
 
@@ -144,7 +136,9 @@ class SocketClient extends AbstractClient
      */
     protected function _receive()
     {
-        if (!$this->_connected) return false;
+        if (!$this->connected) {
+            return false;
+        }
 
         $result = null;
         $start  = microtime(true);
@@ -187,12 +181,14 @@ class SocketClient extends AbstractClient
 
     public function __destruct()
     {
-        if ($this->_connected) $this->disconnect();
+        if ($this->connected) {
+            $this->disconnect();
+        }
     }
 
     public function _get_connected()
     {
-        return $this->_connected;
+        return !feof($this->_socket);
     }
 
     public function _set_blocking($blocking)
