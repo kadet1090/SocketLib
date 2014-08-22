@@ -60,6 +60,8 @@ class SocketClient extends AbstractClient
         'code'   => 0
     );
 
+    protected $_connected;
+
     /**
      * Logger of clients events.
      * @var Logger
@@ -188,7 +190,16 @@ class SocketClient extends AbstractClient
 
     public function _get_connected()
     {
-        return !feof($this->_socket);
+        if ($this->_connected && feof($this->_socket)) {
+            $this->_connected = false;
+            $this->onDisconnect->run($this);
+
+            if (!empty($this->_error['code'])) {
+                $this->raiseError();
+            }
+        }
+
+        return $this->_connected;
     }
 
     public function _set_blocking($blocking)
