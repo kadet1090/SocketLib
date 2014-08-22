@@ -127,17 +127,22 @@ class SocketClient extends AbstractClient
      */
     public function send($text)
     {
-        if (!@fwrite($this->_socket, $text))
+        if (!@$this->_send($text))
             $this->raiseError();
         else
             $this->onSend->run($this, $text);
+    }
+
+    protected function _send($text)
+    {
+        return fwrite($this->_socket, $text);
     }
 
     /**
      * Receives data from server.
      * @return string
      */
-    public function receive()
+    protected function _receive()
     {
         if (!$this->_connected) return false;
 
@@ -158,11 +163,17 @@ class SocketClient extends AbstractClient
             (!$this->_blocking && !empty($content) && !empty($result))
         );
 
+        return trim($result);
+    }
+
+    public function receive()
+    {
+        $result = $this->_receive();
         if (!empty($result)) {
             $this->onReceive->run($this, $result);
         }
 
-        return trim($result);
+        return $result;
     }
 
     /**
