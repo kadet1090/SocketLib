@@ -110,6 +110,7 @@ class SocketClient extends AbstractClient
 
     public function disconnect()
     {
+        $this->_connected = false;
         stream_socket_shutdown($this->_socket, STREAM_SHUT_RDWR);
         $this->onDisconnect->run($this);
     }
