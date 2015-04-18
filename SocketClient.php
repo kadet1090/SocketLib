@@ -7,7 +7,6 @@
 namespace Kadet\SocketLib;
 
 use Kadet\SocketLib\Utils\Logger;
-use Kadet\Utils\Property;
 
 /**
  * Class SocketClient
@@ -160,7 +159,7 @@ class SocketClient extends AbstractClient
             (!$this->_blocking && !empty($content) && !empty($result))
         );
 
-        return trim($result);
+        return $result;
     }
 
     public function receive()
